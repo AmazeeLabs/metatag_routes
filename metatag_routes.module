@@ -24,11 +24,9 @@ function metatag_routes_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_page_attachments().
- *
- * Load all meta tags for this page.
+ * Implements hook_metatags_alter()
  */
-function metatag_routes_page_attachments(array &$attachments) {
+function metatag_routes_metatags_alter(array &$metatags, array $context) {
   // Check if current route is supported by metatag module.
   if (metatag_is_current_route_supported()) {
     $current_route = \Drupal::routeMatch()->getRouteName();
@@ -37,10 +35,9 @@ function metatag_routes_page_attachments(array &$attachments) {
     if ($ids) {
       $entities = \Drupal::service('entity_type.manager')->getStorage('metatag_defaults')->loadMultiple($ids);
       $tags = end($entities)->get('tags');
-      // Generate elements on metatag structure.
-      $generated_tags = \Drupal::service('metatag.manager')->generateElements($tags);
+
       // Replace the new values and keep on the global values.
-      $attachments['#attached']['html_head'] = array_merge($attachments['#attached']['html_head'], $generated_tags['#attached']['html_head']);
+      $metatags = array_merge($metatags, $tags);
     }
   }
 }
